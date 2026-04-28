@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KI erklärt – Interaktives Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0F1A;
+            --bg2: #131829;
+            --bg3: #1A1F35;
+            --surface: #1E2440;
+            --border: #2A3155;
+            --text: #E2E8F0;
+            --text-muted: #7B87A8;
+            --cyan: #06D6A0;
+            --cyan-glow: rgba(6, 214, 160, 0.15);
+            --purple: #A78BFA;
+            --purple-glow: rgba(167, 139, 250, 0.15);
+            --rose: #FB7185;
+            --amber: #FBBF24;
+            --blue: #60A5FA;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            padding: 60px 40px 40px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px; right: -200px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -150px; left: -150px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, var(--purple-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 .accent { color: var(--cyan); }
+        .hero p {
+            margin-top: 12px;
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+        .hero .meta {
+            margin-top: 20px;
+            display: flex;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero .meta span {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg2);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 40px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-tab {
+            padding: 16px 28px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.25s;
+            user-select: none;
+        }
+        .nav-tab:hover { color: var(--text); }
+        .nav-tab.active {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.4s ease;
+        }
+        .section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+        .stat-card.cyan::before { background: var(--cyan); }
+        .stat-card.purple::before { background: var(--purple); }
+        .stat-card.rose::before { background: var(--rose); }
+        .stat-card.amber::before { background: var(--amber); }
+
+        .stat-card .value {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .stat-card.cyan .value { color: var(--cyan); }
+        .stat-card.purple .value { color: var(--purple); }
+        .stat-card.rose .value { color: var(--rose); }
+        .stat-card.amber .value { color: var(--amber); }
+
+        .stat-card .label {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .chart-container h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .chart-container .chart-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-height: 420px;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .filter-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg3);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            border-color: var(--cyan);
+            color: var(--text);
+        }
+        .filter-btn.active {
+            background: var(--cyan);
+            color: var(--bg);
+            border-color: var(--cyan);
+            font-weight: 700;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .data-table th {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        .data-table tr:hover td {
+            background: var(--bg3);
+        }
+        .data-table .bar-cell {
+            position: relative;
+            padding-right: 60px;
+        }
+        .data-table .bar-bg {
+            position: absolute;
+            left: 16px; top: 50%;
+            transform: translateY(-50%);
+            height: 6px;
+            border-radius: 3px;
+            background: var(--cyan);
+            opacity: 0.3;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 32px 40px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            color: var(--text-muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+        }
+        .loading::before {
+            content: '';
+            width: 20px; height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 32px 20px; }
+            .nav-tabs { padding: 0 20px; overflow-x: auto; }
+            .section { padding: 24px 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .hero .meta { flex-wrap: wrap; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>Künstliche <span class="accent">Intelligenz</span><br>erklärt</h1>
+        <p>Interaktive Visualisierung zu KI-Funktionsweisen und -anwendungen</p>
+        <div class="meta">
+            <span>Lucas Spanheimer</span>
+            <span>2026</span>
+            <span>Daten: Supabase</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="growth">Modell-Wachstum</div>
+        <div class="nav-tab" data-tab="industry">Branchen</div>
+        <div class="nav-tab" data-tab="tools">KI-Tools</div>
+    </div>
+
+    <!-- Section 1: Growth -->
+    <div class="section active" id="growth">
+        <div class="section-title">Das explosive Wachstum der KI-Modelle</div>
+        <div class="section-subtitle">Von 117 Millionen auf 2 Billionen Parameter in nur 7 Jahren</div>
+
+        <div class="stats-row" id="growth-stats"></div>
+
+        <div class="filter-bar" id="growth-filters">
+            <div class="filter-btn active" data-filter="all">Alle</div>
+            <div class="filter-btn" data-filter="Language Model">Language Models</div>
+            <div class="filter-btn" data-filter="Image Generation">Bildgenerierung</div>
+            <div class="filter-btn" data-filter="Video Generation">Videogenerierung</div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Parameter-Wachstum nach Modell</h3>
+            <div class="chart-desc">Anzahl der Parameter in Milliarden – sortiert nach Erscheinungsjahr</div>
+            <div class="chart-wrapper">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>KI-Modelle nach Organisation</h3>
+            <div class="chart-desc">Anzahl veröffentlichter Modelle pro Unternehmen</div>
+            <div class="chart-wrapper">
+                <canvas id="orgChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Industry -->
+    <div class="section" id="industry">
+        <div class="section-title">KI-Adoption in der Industrie</div>
+        <div class="section-subtitle">Wie schnell verschiedene Branchen KI einsetzen</div>
+
+        <div class="stats-row" id="industry-stats"></div>
+
+        <div class="chart-container">
+            <h3>Adoption nach Branche (2025)</h3>
+            <div class="chart-desc">Anteil der Unternehmen mit KI-Einsatz in Prozent</div>
+            <div class="chart-wrapper">
+                <canvas id="industryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <h3>Wachstum über die Jahre</h3>
+                <div class="chart-desc">Adoption-Rate 2020–2025 für ausgewählte Branchen</div>
+                <div class="chart-wrapper">
+                    <canvas id="industryLineChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Investitionen nach Branche</h3>
+                <div class="chart-desc">KI-Investitionen 2024 in Milliarden USD</div>
+                <div class="chart-wrapper">
+                    <canvas id="investmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Tools -->
+    <div class="section" id="tools">
+        <div class="section-title">Die KI-Tools von heute</div>
+        <div class="section-subtitle">Welche Tools dominieren den Markt?</div>
+
+        <div class="stats-row" id="tools-stats"></div>
+
+        <div class="filter-bar" id="tools-filters"></div>
+
+        <div class="chart-container">
+            <h3>Monatlich aktive Nutzer</h3>
+            <div class="chart-desc">In Millionen – gefiltert nach Kategorie</div>
+            <div class="chart-wrapper">
+                <canvas id="toolsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <h3>Marktanteile (Chatbots)</h3>
+                <div class="chart-desc">Verteilung nach monatlich aktiven Nutzern</div>
+                <div class="chart-wrapper">
+                    <canvas id="marketShareChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Wachstumsrate</h3>
+                <div class="chart-desc">Nutzerwachstum in Prozent</div>
+                <div class="chart-wrapper">
+                    <canvas id="growthRateChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <span>Thema 048 – Künstliche Intelligenz erklärt | Lucas Spanheimer | BI / Butscher 2026</span>
+        <span>Datenquelle: Supabase PostgreSQL</span>
+    </div>
+
+<script>
+// ============ SUPABASE CONFIG ============
+const SUPABASE_URL = 'https://jkdcqcasceffkgrivoun.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_x5iIH6zio7FOk8PfPBl7fg_yvklgl41';
+
+async function fetchTable(table) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${table}`);
+    return res.json();
+}
+
+// ============ CHART DEFAULTS ============
+Chart.defaults.color = '#7B87A8';
+Chart.defaults.borderColor = '#2A3155';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+const COLORS = {
+    cyan: '#06D6A0',
+    purple: '#A78BFA',
+    rose: '#FB7185',
+    amber: '#FBBF24',
+    blue: '#60A5FA',
+    teal: '#2DD4BF',
+    lime: '#A3E635',
+    orange: '#FB923C',
+};
+const COLOR_LIST = Object.values(COLORS);
+
+// ============ NAVIGATION ============
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ============ STATE ============
+let modelsData = [], industryData = [], toolsData = [];
+let growthChart, orgChart, industryChart, industryLineChart, investmentChart;
+let toolsChart, marketShareChart, growthRateChart;
+
+// ============ INIT ============
+async function init() {
+    try {
+        [modelsData, industryData, toolsData] = await Promise.all([
+            fetchTable('ai_models_growth'),
+            fetchTable('ai_industry_adoption'),
+            fetchTable('ai_tools_usage')
+        ]);
+
+        modelsData.sort((a, b) => a.release_year - b.release_year || a.parameters_billions - b.parameters_billions);
+        industryData.sort((a, b) => b.adoption_rate_2025 - a.adoption_rate_2025);
+        toolsData.sort((a, b) => b.monthly_active_users_millions - a.monthly_active_users_millions);
+
+        renderGrowthSection();
+        renderIndustrySection();
+        renderToolsSection();
+    } catch (err) {
+        console.error('Error loading data:', err);
+        document.querySelectorAll('.section').forEach(s => {
+            s.innerHTML = `<div class="loading" style="color: var(--rose);">Fehler beim Laden der Daten. Bitte Seite neu laden.</div>`;
+        });
+    }
+}
+
+// ============ GROWTH SECTION ============
+function renderGrowthSection(filter = 'all') {
+    const data = filter === 'all' ? modelsData : modelsData.filter(m => m.model_type === filter);
+
+    // Stats
+    const maxModel = data.reduce((a, b) => a.parameters_billions > b.parameters_billions ? a : b, data[0]);
+    const totalModels = data.length;
+    const orgs = [...new Set(data.map(m => m.organization))].length;
+
+    document.getElementById('growth-stats').innerHTML = `
+        <div class="stat-card cyan">
+            <div class="value">${totalModels}</div>
+            <div class="label">Modelle insgesamt</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="value">${orgs}</div>
+            <div class="label">Organisationen</div>
+        </div>
+        <div class="stat-card rose">
+            <div class="value">${formatNum(maxModel.parameters_billions)}</div>
+            <div class="label">Größtes Modell (Mrd. Parameter)</div>
+        </div>
+        <div class="stat-card amber">
+            <div class="value">17.000×</div>
+            <div class="label">Wachstumsfaktor seit 2018</div>
+        </div>
+    `;
+
+    // Bar chart
+    if (growthChart) growthChart.destroy();
+    const ctx1 = document.getElementById('growthChart').getContext('2d');
+    growthChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: data.map(m => `${m.model_name} (${m.release_year})`),
+            datasets: [{
+                data: data.map(m => m.parameters_billions),
+                backgroundColor: data.map((m, i) => {
+                    const yearColors = { 2018: COLORS.blue, 2019: COLORS.teal, 2020: COLORS.cyan, 2021: COLORS.lime, 2022: COLORS.amber, 2023: COLORS.orange, 2024: COLORS.rose, 2025: COLORS.purple };
+                    return yearColors[m.release_year] || COLORS.cyan;
+                }),
+                borderRadius: 4,
+                maxBarThickness: 40,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Parameter (Milliarden)', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                x: {
+                    ticks: { maxRotation: 45, font: { size: 10 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Org pie chart
+    if (orgChart) orgChart.destroy();
+    const orgCounts = {};
+    data.forEach(m => { orgCounts[m.organization] = (orgCounts[m.organization] || 0) + 1; });
+    const sortedOrgs = Object.entries(orgCounts).sort((a, b) => b[1] - a[1]);
+
+    const ctx2 = document.getElementById('orgChart').getContext('2d');
+    orgChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: sortedOrgs.map(o => o[0]),
+            datasets: [{
+                data: sortedOrgs.map(o => o[1]),
+                backgroundColor: COLOR_LIST,
+                borderColor: '#1E2440',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
+            }
+        }
+    });
+}
+
+// ============ INDUSTRY SECTION ============
+function renderIndustrySection() {
+    // Stats
+    const avgRate = (industryData.reduce((s, d) => s + d.adoption_rate_2025, 0) / industryData.length).toFixed(0);
+    const totalInvest = industryData.reduce((s, d) => s + d.investment_billions_2024, 0).toFixed(1);
+    const topIndustry = industryData[0];
+
+    document.getElementById('industry-stats').innerHTML = `
+        <div class="stat-card cyan">
+            <div class="value">${avgRate}%</div>
+            <div class="label">Durchschnittliche Adoption</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="value">${topIndustry.adoption_rate_2025}%</div>
+            <div class="label">${topIndustry.industry} (höchste)</div>
+        </div>
+        <div class="stat-card rose">
+            <div class="value">$${totalInvest}B</div>
+            <div class="label">Gesamtinvestitionen 2024</div>
+        </div>
+        <div class="stat-card amber">
+            <div class="value">15</div>
+            <div class="label">Branchen analysiert</div>
+        </div>
+    `;
+
+    // Horizontal bar
+    const ctx3 = document.getElementById('industryChart').getContext('2d');
+    industryChart = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: industryData.map(d => d.industry),
+            datasets: [{
+                data: industryData.map(d => d.adoption_rate_2025),
+                backgroundColor: industryData.map((d, i) => {
+                    const pct = d.adoption_rate_2025 / 100;
+                    return `rgba(6, 214, 160, ${0.3 + pct * 0.7})`;
+                }),
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    max: 100,
+                    title: { display: true, text: 'Adoption Rate (%)', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Line chart – selected industries
+    const selected = ['Technology', 'Healthcare', 'Education', 'Finance & Banking', 'Media & Entertainment'];
+    const selectedData = industryData.filter(d => selected.includes(d.industry));
+    const years = ['2020', '2021', '2022', '2023', '2024', '2025'];
+
+    const ctx4 = document.getElementById('industryLineChart').getContext('2d');
+    industryLineChart = new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: selectedData.map((d, i) => ({
+                label: d.industry,
+                data: [d.adoption_rate_2020, d.adoption_rate_2021, d.adoption_rate_2022, d.adoption_rate_2023, d.adoption_rate_2024, d.adoption_rate_2025],
+                borderColor: COLOR_LIST[i],
+                backgroundColor: COLOR_LIST[i] + '20',
+                tension: 0.4,
+                borderWidth: 2.5,
+                pointRadius: 3,
+                pointHoverRadius: 6,
+            }))
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 11 } } } },
+            scales: {
+                y: {
+                    min: 0, max: 100,
+                    title: { display: true, text: '%', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Investment bar
+    const investSorted = [...industryData].sort((a, b) => b.investment_billions_2024 - a.investment_billions_2024);
+    const ctx5 = document.getElementById('investmentChart').getContext('2d');
+    investmentChart = new Chart(ctx5, {
+        type: 'bar',
+        data: {
+            labels: investSorted.map(d => d.industry),
+            datasets: [{
+                data: investSorted.map(d => d.investment_billions_2024),
+                backgroundColor: COLORS.purple + '90',
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Milliarden USD', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                y: {
+                    ticks: { font: { size: 10 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// ============ TOOLS SECTION ============
+function renderToolsSection(filter = 'all') {
+    const data = filter === 'all' ? toolsData : toolsData.filter(t => t.category === filter);
+
+    // Build filter buttons
+    const categories = ['all', ...new Set(toolsData.map(t => t.category))];
+    const filterLabels = { all: 'Alle', Chatbot: 'Chatbots', 'Image Generation': 'Bilder', 'Code Assistant': 'Code', Writing: 'Schreiben', Search: 'Suche', 'Productivity AI': 'Produktivität', Music: 'Musik', Video: 'Video', Audio: 'Audio', Research: 'Forschung' };
+    document.getElementById('tools-filters').innerHTML = categories.map(c =>
+        `<div class="filter-btn ${c === filter ? 'active' : ''}" data-filter="${c}">${filterLabels[c] || c}</div>`
+    ).join('');
+
+    // Re-attach filter listeners
+    document.querySelectorAll('#tools-filters .filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => renderToolsSection(btn.dataset.filter));
+    });
+
+    // Stats
+    const totalUsers = data.reduce((s, t) => s + t.monthly_active_users_millions, 0);
+    const fastestGrowing = data.reduce((a, b) => a.user_growth_rate_percent > b.user_growth_rate_percent ? a : b, data[0]);
+    const freeTools = data.filter(t => t.pricing_free_tier).length;
+
+    document.getElementById('tools-stats').innerHTML = `
+        <div class="stat-card cyan">
+            <div class="value">${formatNum(totalUsers)}M</div>
+            <div class="label">Gesamtnutzer (monatlich)</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="value">${data.length}</div>
+            <div class="label">Tools analysiert</div>
+        </div>
+        <div class="stat-card rose">
+            <div class="value">${fastestGrowing.tool_name}</div>
+            <div class="label">Schnellstes Wachstum (${fastestGrowing.user_growth_rate_percent}%)</div>
+        </div>
+        <div class="stat-card amber">
+            <div class="value">${freeTools}/${data.length}</div>
+            <div class="label">Mit kostenlosem Zugang</div>
+        </div>
+    `;
+
+    // Bar chart
+    if (toolsChart) toolsChart.destroy();
+    const ctx6 = document.getElementById('toolsChart').getContext('2d');
+    toolsChart = new Chart(ctx6, {
+        type: 'bar',
+        data: {
+            labels: data.map(t => t.tool_name),
+            datasets: [{
+                data: data.map(t => t.monthly_active_users_millions),
+                backgroundColor: data.map((t, i) => COLOR_LIST[i % COLOR_LIST.length] + 'CC'),
+                borderRadius: 4,
+                maxBarThickness: 50,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Monatliche Nutzer (Mio.)', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                x: {
+                    ticks: { maxRotation: 45, font: { size: 11 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Market share doughnut (chatbots only)
+    if (marketShareChart) marketShareChart.destroy();
+    const chatbots = toolsData.filter(t => t.category === 'Chatbot').sort((a, b) => b.monthly_active_users_millions - a.monthly_active_users_millions);
+    const ctx7 = document.getElementById('marketShareChart').getContext('2d');
+    marketShareChart = new Chart(ctx7, {
+        type: 'doughnut',
+        data: {
+            labels: chatbots.map(t => t.tool_name),
+            datasets: [{
+                data: chatbots.map(t => t.monthly_active_users_millions),
+                backgroundColor: [COLORS.cyan, COLORS.purple, COLORS.blue, COLORS.rose, COLORS.amber, COLORS.teal],
+                borderColor: '#1E2440',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { padding: 12, font: { size: 11 } } }
+            }
+        }
+    });
+
+    // Growth rate chart
+    if (growthRateChart) growthRateChart.destroy();
+    const growthSorted = [...data].sort((a, b) => b.user_growth_rate_percent - a.user_growth_rate_percent);
+    const ctx8 = document.getElementById('growthRateChart').getContext('2d');
+    growthRateChart = new Chart(ctx8, {
+        type: 'bar',
+        data: {
+            labels: growthSorted.map(t => t.tool_name),
+            datasets: [{
+                data: growthSorted.map(t => t.user_growth_rate_percent),
+                backgroundColor: growthSorted.map((t, i) => {
+                    const pct = t.user_growth_rate_percent / 120;
+                    return `rgba(251, 113, 133, ${0.3 + pct * 0.7})`;
+                }),
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Wachstum (%)', color: '#7B87A8' },
+                    grid: { color: '#1E2440' }
+                },
+                y: {
+                    ticks: { font: { size: 10 } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// Growth filter
+document.querySelectorAll('#growth-filters .filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#growth-filters .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderGrowthSection(btn.dataset.filter);
+    });
+});
+
+// ============ HELPERS ============
+function formatNum(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'T';
+    if (n >= 1) return Math.round(n).toLocaleString('de-DE');
+    return n.toFixed(2);
+}
+
+// ============ START ============
+init();
+</script>
+</body>
+</html>
