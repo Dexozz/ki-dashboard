@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>KI erklärt – Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,500;9..40,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0F1A;--bg2:#131829;--bg3:#1A1F35;--sf:#1E2440;--bd:#2A3155;--tx:#E2E8F0;--mt:#7B87A8;--cy:#06D6A0;--pu:#A78BFA;--ro:#FB7185;--am:#FBBF24;--bl:#60A5FA;--tl:#2DD4BF;--li:#A3E635;--or:#FB923C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+.hero{position:relative;padding:45px 40px 30px;overflow:hidden;background:linear-gradient(135deg,var(--bg),var(--bg2),var(--bg))}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(6,214,160,.12),transparent 70%);pointer-events:none}
+.hero h1{font-family:'Space Mono',monospace;font-size:clamp(1.8rem,5vw,3rem);font-weight:700;line-height:1.1;position:relative;z-index:1}
+.hero .a{color:var(--cy)}.hero p{margin-top:8px;font-size:.95rem;color:var(--mt);position:relative;z-index:1}
+.hero .m{margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
+.hero .m span{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--mt);letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--bd);border-radius:4px;background:var(--bg2)}
+.nt{display:flex;gap:0;padding:0 40px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100}
+.nt div{padding:13px 22px;font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--mt);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;user-select:none}
+.nt div:hover{color:var(--tx)}.nt div.on{color:var(--cy);border-bottom-color:var(--cy)}
+.sec{display:none;padding:30px 40px;animation:fi .4s}.sec.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.st{font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;margin-bottom:5px}
+.ss{color:var(--mt);font-size:.85rem;margin-bottom:6px}
+.tag{display:inline-block;font-size:.62rem;color:var(--cy);background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.2);padding:2px 8px;border-radius:3px;margin-bottom:18px;font-family:'Space Mono',monospace}
+.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:22px}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc.cy::before{background:var(--cy)}.sc.pu::before{background:var(--pu)}.sc.ro::before{background:var(--ro)}.sc.am::before{background:var(--am)}
+.sc .v{font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;line-height:1}
+.sc.cy .v{color:var(--cy)}.sc.pu .v{color:var(--pu)}.sc.ro .v{color:var(--ro)}.sc.am .v{color:var(--am)}
+.sc .l{margin-top:5px;font-size:.7rem;color:var(--mt)}
+.cc{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:22px;margin-bottom:18px}
+.cc h3{font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;margin-bottom:2px}
+.cc .d{font-size:.72rem;color:var(--mt);margin-bottom:14px}
+.cw{position:relative;width:100%;max-height:380px}
+.fb{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.fb div{font-size:.72rem;padding:6px 14px;border-radius:5px;border:1px solid var(--bd);background:var(--bg3);color:var(--mt);cursor:pointer;transition:all .2s}
+.fb div:hover{border-color:var(--cy);color:var(--tx)}.fb div.on{background:var(--cy);color:var(--bg);border-color:var(--cy);font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ft{padding:24px 40px;border-top:1px solid var(--bd);font-size:.65rem;color:var(--mt);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:768px){.hero{padding:24px 16px}.nt{padding:0 16px;overflow-x:auto}.sec{padding:18px 16px}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="hero"><h1>Künstliche <span class="a">Intelligenz</span><br>erklärt</h1><p>Interaktive Visualisierung zu KI-Funktionsweisen und -anwendungen</p><div class="m"><span>Lucas Spanheimer</span><span>2026</span><span>Daten: 3× Kaggle → Supabase</span></div></div>
+<div class="nt"><div class="on" data-t="mod">Modell-Benchmark</div><div data-t="ado">Adoption & Workforce</div><div data-t="too">KI-Tools</div></div>
+
+<div class="sec on" id="mod">
+<div class="st">KI-Modelle im Benchmark-Vergleich</div><div class="ss">135+ Modelle verglichen nach Intelligenz, Geschwindigkeit und Preis</div><div class="tag">Kaggle: AI Models Benchmark Dataset 2026 (Asadullah Shehbaz)</div>
+<div class="sr" id="ms"></div><div class="fb" id="mf"></div>
+<div class="cc"><h3>Top 20 nach Intelligence Index</h3><div class="d">Zusammengesetzter Score aus Reasoning, Coding & Wissen – höher = besser</div><div class="cw"><canvas id="c1"></canvas></div></div>
+<div class="g2"><div class="cc"><h3>Preis vs. Intelligenz</h3><div class="d">$/1M Tokens vs. Intelligence Index (Bubble = Speed)</div><div class="cw"><canvas id="c2"></canvas></div></div>
+<div class="cc"><h3>Modelle pro Organisation</h3><div class="d">Wer entwickelt die meisten Modelle?</div><div class="cw"><canvas id="c3"></canvas></div></div></div>
+<div class="cc"><h3>Speed-Ranking: Tokens pro Sekunde</h3><div class="d">Top 15 – ein Token ≈ ein halbes Wort</div><div class="cw"><canvas id="c4"></canvas></div></div>
+</div>
+
+<div class="sec" id="ado">
+<div class="st">KI-Adoption & Workforce Impact</div><div class="ss">150.000 Unternehmensbefragungen aus 30 Ländern und 9 Branchen</div><div class="tag">Kaggle: Global AI Adoption & Workforce Impact Dataset (Mohan Krishna Thalla)</div>
+<div class="sr" id="as"></div>
+<div class="cc"><h3>Adoption-Rate nach Branche (2023–2026)</h3><div class="d">Durchschnittliche KI-Adoptionsrate in % – Wachstum über 4 Jahre</div><div class="cw"><canvas id="c5"></canvas></div></div>
+<div class="g2"><div class="cc"><h3>Adoption nach Land</h3><div class="d">Top 15 Länder nach Ø Adoptionsrate</div><div class="cw"><canvas id="c6"></canvas></div></div>
+<div class="cc"><h3>Produktivitätssteigerung nach Branche</h3><div class="d">Ø Produktivitätsänderung in % und Ø Automationsrate</div><div class="cw"><canvas id="c7"></canvas></div></div></div>
+<div class="g2"><div class="cc"><h3>Meistgenutztes KI-Tool</h3><div class="d">Verteilung der 150k Befragungen nach primärem Tool</div><div class="cw"><canvas id="c8"></canvas></div></div>
+<div class="cc"><h3>KI & Arbeitsmarkt</h3><div class="d">Jobs verdrängt vs. Jobs geschaffen (Ø pro Branche)</div><div class="cw"><canvas id="c9"></canvas></div></div></div>
+<div class="cc"><h3>AI Readiness: Patente & Forscher weltweit</h3><div class="d">AI-Patente 2024 und Forscher pro Million Einwohner nach Land</div><div class="cw"><canvas id="c10"></canvas></div></div>
+</div>
+
+<div class="sec" id="too">
+<div class="st">Die KI-Tools von heute</div><div class="ss">40 Tools im Vergleich: Popularität, Bewertung und Kategorie</div><div class="tag">Kaggle: Top AI Tools – Popularity & Valuation (Arda Yavuz Keskin)</div>
+<div class="sr" id="ts"></div><div class="fb" id="tf"></div>
+<div class="cc"><h3>Popularitäts-Score (1–10)</h3><div class="d">Basierend auf Nutzerbasis, Medienpräsenz, App-Rankings, Community – ChatGPT = 10 als Referenz</div><div class="cw"><canvas id="c11"></canvas></div></div>
+<div class="g2"><div class="cc"><h3>Top 10 nach Unternehmensbewertung</h3><div class="d">Geschätzte Bewertung in Milliarden USD</div><div class="cw"><canvas id="c12"></canvas></div></div>
+<div class="cc"><h3>Tools nach Kategorie</h3><div class="d">Verteilung der 40 Tools</div><div class="cw"><canvas id="c13"></canvas></div></div></div>
+<div class="cc"><h3>Release-Timeline</h3><div class="d">Veröffentlichungsjahr der Tools</div><div class="cw"><canvas id="c14"></canvas></div></div>
+</div>
+
+<div class="ft"><span>Thema 048 – Künstliche Intelligenz erklärt | Lucas Spanheimer | BI / Butscher 2026</span><span>3 Kaggle-Datensätze → Supabase PostgreSQL → Chart.js → GitHub Pages</span></div>
+
+<script>
+const U='https://jkdcqcasceffkgrivoun.supabase.co',K='sb_publishable_x5iIH6zio7FOk8PfPBl7fg_yvklgl41';
+async function q(t){return(await fetch(`${U}/rest/v1/${t}?select=*`,{headers:{apikey:K,Authorization:`Bearer ${K}`}})).json();}
+Chart.defaults.color='#7B87A8';Chart.defaults.borderColor='#2A3155';Chart.defaults.font.family="'DM Sans',sans-serif";
+const C=['#06D6A0','#A78BFA','#FB7185','#FBBF24','#60A5FA','#2DD4BF','#A3E635','#FB923C','#E879F9'];
+const CC={'OpenAI':'#06D6A0','Google':'#60A5FA','Anthropic':'#A78BFA','xAI':'#FB7185','DeepSeek':'#FBBF24','Alibaba':'#FB923C','Meta':'#2DD4BF','NVIDIA':'#A3E635','Amazon':'#60A5FA','Mistral':'#FB7185'};
+document.querySelectorAll('.nt div').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.nt div').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.sec').forEach(x=>x.classList.remove('on'));t.classList.add('on');document.getElementById(t.dataset.t).classList.add('on');}));
+let ch={};function d(k){if(ch[k])ch[k].destroy();}
+let MO,AI,AC,AT,IS,CI,TO;
+
+async function init(){
+[MO,AI,AC,AT,IS,CI,TO]=await Promise.all([q('ai_models_benchmark'),q('adoption_by_industry'),q('adoption_by_country'),q('adoption_by_tool'),q('industry_summary'),q('country_ai_index'),q('ai_tools')]);
+rM();rA();rT();
+}
+
+// === MODELS ===
+function rM(f='all'){
+let data=MO.filter(m=>m.intelligence_index!=null);
+if(f!=='all')data=data.filter(m=>m.creator===f);
+data.sort((a,b)=>b.intelligence_index-a.intelligence_index);
+document.getElementById('mf').innerHTML=`<div class="${f==='all'?'on':''}" data-f="all">Alle</div>`+
+['OpenAI','Google','Anthropic','xAI','DeepSeek','Alibaba','Meta','NVIDIA','Mistral','Amazon'].map(c=>`<div class="${f===c?'on':''}" data-f="${c}">${c}</div>`).join('');
+document.querySelectorAll('#mf div').forEach(b=>b.addEventListener('click',()=>rM(b.dataset.f)));
+let top=data[0]||{},avg=data.length?(data.reduce((s,m)=>s+(m.price_per_1m_tokens||0),0)/data.length).toFixed(2):0;
+let fast=data.reduce((a,b)=>(a.speed_tokens_per_sec||0)>(b.speed_tokens_per_sec||0)?a:b,data[0]||{});
+document.getElementById('ms').innerHTML=`<div class="sc cy"><div class="v">${data.length}</div><div class="l">Modelle</div></div><div class="sc pu"><div class="v">${top.intelligence_index||'-'}</div><div class="l">Höchster Index</div></div><div class="sc ro"><div class="v">$${avg}</div><div class="l">Ø Preis/1M Tokens</div></div><div class="sc am"><div class="v">${fast.speed_tokens_per_sec||'-'} t/s</div><div class="l">Max Speed</div></div>`;
+
+d('c1');let t20=data.slice(0,20);
+ch.c1=new Chart(document.getElementById('c1'),{type:'bar',data:{labels:t20.map(m=>m.model_name),datasets:[{data:t20.map(m=>m.intelligence_index),backgroundColor:t20.map(m=>(CC[m.creator]||'#A3E635')+'CC'),borderRadius:4,maxBarThickness:38}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Intelligence Index'},grid:{color:'#1E2440'}},x:{ticks:{maxRotation:45,font:{size:8}},grid:{display:false}}}}});
+
+d('c2');let sc=data.filter(m=>m.price_per_1m_tokens>0&&m.speed_tokens_per_sec>0).slice(0,30);
+let sg={};sc.forEach(m=>{let g=CC[m.creator]?m.creator:'Andere';if(!sg[g])sg[g]=[];sg[g].push(m);});
+ch.c2=new Chart(document.getElementById('c2'),{type:'bubble',data:{datasets:Object.entries(sg).map(([n,items])=>({label:n,data:items.map(m=>({x:m.price_per_1m_tokens,y:m.intelligence_index,r:Math.min(Math.max(m.speed_tokens_per_sec/15,3),18)})),backgroundColor:(CC[n]||'#A3E635')+'80',borderColor:CC[n]||'#A3E635'}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{x:{title:{display:true,text:'Preis ($/1M Tokens)'},grid:{color:'#1E2440'}},y:{title:{display:true,text:'Intelligence Index'},grid:{color:'#1E2440'}}}}});
+
+d('c3');let oc={};(f==='all'?MO:MO.filter(m=>m.creator===f)).forEach(m=>{oc[m.creator]=(oc[m.creator]||0)+1;});
+let os=Object.entries(oc).sort((a,b)=>b[1]-a[1]).slice(0,12);
+ch.c3=new Chart(document.getElementById('c3'),{type:'doughnut',data:{labels:os.map(o=>o[0]),datasets:[{data:os.map(o=>o[1]),backgroundColor:C,borderColor:'#1E2440',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:8,font:{size:9}}}}}});
+
+d('c4');let sp=[...data].filter(m=>m.speed_tokens_per_sec>0).sort((a,b)=>b.speed_tokens_per_sec-a.speed_tokens_per_sec).slice(0,15);
+ch.c4=new Chart(document.getElementById('c4'),{type:'bar',data:{labels:sp.map(m=>m.model_name),datasets:[{data:sp.map(m=>m.speed_tokens_per_sec),backgroundColor:sp.map((_,i)=>C[i%C.length]+'BB'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Tokens pro Sekunde'},grid:{color:'#1E2440'}},y:{ticks:{font:{size:8}},grid:{display:false}}}}});
+}
+
+// === ADOPTION ===
+function rA(){
+let te=AI.reduce((s,d)=>s+d.entries,0);
+let topInd=IS.sort((a,b)=>b.avg_adoption_rate-a.avg_adoption_rate)[0];
+document.getElementById('as').innerHTML=`<div class="sc cy"><div class="v">${(te/1000).toFixed(0)}k</div><div class="l">Befragungen</div></div><div class="sc pu"><div class="v">30</div><div class="l">Länder</div></div><div class="sc ro"><div class="v">${topInd.avg_adoption_rate}%</div><div class="l">Höchste Adoption (${topInd.industry})</div></div><div class="sc am"><div class="v">6</div><div class="l">KI-Tools verglichen</div></div>`;
+
+// Line chart: adoption by industry over years
+d('c5');let industries=[...new Set(AI.map(d=>d.industry))];let years=[...new Set(AI.map(d=>d.year))].sort();
+ch.c5=new Chart(document.getElementById('c5'),{type:'line',data:{labels:years,datasets:industries.map((ind,i)=>({label:ind,data:years.map(y=>{let r=AI.find(d=>d.industry===ind&&d.year===y);return r?r.avg_adoption_rate:null;}),borderColor:C[i%C.length],backgroundColor:C[i%C.length]+'20',tension:.4,borderWidth:2,pointRadius:3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},padding:10}}},scales:{y:{title:{display:true,text:'Adoptionsrate (%)'},grid:{color:'#1E2440'}},x:{title:{display:true,text:'Jahr'},grid:{display:false}}}}});
+
+// Country bar
+d('c6');let ctop=[...AC].sort((a,b)=>b.avg_adoption_rate-a.avg_adoption_rate).slice(0,15);
+ch.c6=new Chart(document.getElementById('c6'),{type:'bar',data:{labels:ctop.map(d=>d.country),datasets:[{data:ctop.map(d=>d.avg_adoption_rate),backgroundColor:'#A78BFA'+'AA',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Ø Adoptionsrate (%)'},grid:{color:'#1E2440'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});
+
+// Productivity + Automation grouped
+d('c7');let isSorted=[...IS].sort((a,b)=>b.avg_productivity_change-a.avg_productivity_change);
+ch.c7=new Chart(document.getElementById('c7'),{type:'bar',data:{labels:isSorted.map(d=>d.industry),datasets:[{label:'Produktivität (%)',data:isSorted.map(d=>d.avg_productivity_change),backgroundColor:'#06D6A0'+'CC',borderRadius:3},{label:'Kundenzufriedenheit',data:isSorted.map(d=>d.avg_customer_satisfaction),backgroundColor:'#FBBF24'+'CC',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{y:{title:{display:true,text:'Wert'},grid:{color:'#1E2440'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+
+// Tool donut
+d('c8');let tSorted=[...AT].sort((a,b)=>b.entries-a.entries);
+ch.c8=new Chart(document.getElementById('c8'),{type:'doughnut',data:{labels:tSorted.map(d=>`${d.tool_name} (${(d.entries/1500).toFixed(0)}k)`),datasets:[{data:tSorted.map(d=>d.entries),backgroundColor:C,borderColor:'#1E2440',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:8,font:{size:10}}}}}});
+
+// Jobs created vs displaced
+d('c9');
+ch.c9=new Chart(document.getElementById('c9'),{type:'bar',data:{labels:IS.map(d=>d.industry),datasets:[{label:'Jobs verdrängt (Ø)',data:IS.map(d=>d.avg_jobs_displaced),backgroundColor:'#FB7185'+'CC',borderRadius:3},{label:'Jobs geschaffen (Ø)',data:IS.map(d=>d.avg_jobs_created),backgroundColor:'#06D6A0'+'CC',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{y:{title:{display:true,text:'Anzahl Jobs (Ø)'},grid:{color:'#1E2440'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+
+// Patents & Researchers
+d('c10');let ciTop=[...CI].sort((a,b)=>b.ai_patent_filings-a.ai_patent_filings).slice(0,12);
+ch.c10=new Chart(document.getElementById('c10'),{type:'bar',data:{labels:ciTop.map(d=>d.country),datasets:[{label:'AI-Patente 2024',data:ciTop.map(d=>d.ai_patent_filings),backgroundColor:'#60A5FA'+'CC',borderRadius:3,yAxisID:'y'},{label:'Forscher/Mio. Einwohner',data:ciTop.map(d=>d.ai_researchers_per_million),backgroundColor:'#FB923C'+'CC',borderRadius:3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9}}}},scales:{y:{position:'left',title:{display:true,text:'Patente'},grid:{color:'#1E2440'}},y1:{position:'right',title:{display:true,text:'Forscher/Mio.'},grid:{display:false}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+}
+
+// === TOOLS ===
+function rT(f='all'){
+let data=f==='all'?TO:TO.filter(t=>t.ai_type===f);
+data=[...data].sort((a,b)=>b.popularity_score-a.popularity_score);
+let types=['all',...new Set(TO.map(t=>t.ai_type))];
+let tl={all:'Alle',Chatbot:'Chatbots','Image Generator':'Bilder','Video Generator':'Video','Coding Assistant':'Code','Audio Generator':'Audio','Writing Assistant':'Schreiben',Marketing:'Marketing',Productivity:'Produktivität'};
+document.getElementById('tf').innerHTML=types.map(t=>`<div class="${t===f?'on':''}" data-f="${t}">${tl[t]||t}</div>`).join('');
+document.querySelectorAll('#tf div').forEach(b=>b.addEventListener('click',()=>rT(b.dataset.f)));
+let top=data[0]||{},tv=data.reduce((s,t)=>s+(t.valuation_billion_usd||0),0).toFixed(1);
+document.getElementById('ts').innerHTML=`<div class="sc cy"><div class="v">${data.length}</div><div class="l">Tools</div></div><div class="sc pu"><div class="v">${top.tool_name||'-'}</div><div class="l">Beliebtestes (Score ${top.popularity_score})</div></div><div class="sc ro"><div class="v">${(data.reduce((s,t)=>s+t.popularity_score,0)/data.length).toFixed(1)}</div><div class="l">Ø Score</div></div><div class="sc am"><div class="v">$${tv}B</div><div class="l">Gesamtbewertung</div></div>`;
+
+d('c11');ch.c11=new Chart(document.getElementById('c11'),{type:'bar',data:{labels:data.map(t=>t.tool_name),datasets:[{data:data.map(t=>t.popularity_score),backgroundColor:data.map((_,i)=>C[i%C.length]+'CC'),borderRadius:4,maxBarThickness:32}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:10,title:{display:true,text:'Popularitäts-Score (1-10)'},grid:{color:'#1E2440'}},x:{ticks:{maxRotation:45,font:{size:7}},grid:{display:false}}}}});
+
+d('c12');let vd=[...data].filter(t=>t.valuation_billion_usd>0.5).sort((a,b)=>b.valuation_billion_usd-a.valuation_billion_usd).slice(0,10);
+ch.c12=new Chart(document.getElementById('c12'),{type:'bar',data:{labels:vd.map(t=>t.tool_name),datasets:[{data:vd.map(t=>t.valuation_billion_usd),backgroundColor:'#FBBF24'+'AA',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'Milliarden USD'},grid:{color:'#1E2440'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});
+
+d('c13');let tyc={};TO.forEach(t=>{tyc[t.ai_type]=(tyc[t.ai_type]||0)+1;});let tys=Object.entries(tyc).sort((a,b)=>b[1]-a[1]);
+ch.c13=new Chart(document.getElementById('c13'),{type:'doughnut',data:{labels:tys.map(t=>t[0]),datasets:[{data:tys.map(t=>t[1]),backgroundColor:C,borderColor:'#1E2440',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:6,font:{size:9}}}}}});
+
+d('c14');let yc={};TO.forEach(t=>{yc[t.release_year]=(yc[t.release_year]||0)+1;});let ys=Object.keys(yc).sort();
+ch.c14=new Chart(document.getElementById('c14'),{type:'bar',data:{labels:ys,datasets:[{data:ys.map(y=>yc[y]),backgroundColor:ys.map((_,i)=>C[i%C.length]),borderRadius:6,maxBarThickness:55}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Anzahl Tools'},grid:{color:'#1E2440'}},x:{title:{display:true,text:'Erscheinungsjahr'},grid:{display:false}}}}});
+}
+
+init();
+</script>
+</body>
+</html>
